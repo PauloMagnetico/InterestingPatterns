@@ -4,6 +4,8 @@ import TenderCard from "./components/TenderCard";
 import SearchBar from "./components/SearchBar";
 import "./App.css";
 
+const PAGE_SIZE = 25;
+
 export default function App() {
   const [filters, setFilters] = useState({});
   const [page, setPage] = useState(1);
@@ -14,7 +16,7 @@ export default function App() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetchTenders({ ...filters, page })
+    fetchTenders({ ...filters, page, pageSize: PAGE_SIZE })
       .then(setData)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -25,47 +27,73 @@ export default function App() {
     setPage(1);
   };
 
-  const totalPages = data ? Math.ceil(data.total / data.page_size) : 0;
+  const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0;
 
   return (
     <div className="app">
       <header className="app-header">
+        <p className="header-eyebrow">Belgisch Aanbestedingsregister</p>
         <h1>InterestingPatterns</h1>
-        <p>Openbare aanbestedingen in België — we tonen enkel interessante patronen</p>
+        <p className="header-tagline">
+          — wij tonen enkel interessante patronen
+        </p>
+        <div className="header-meta">
+          <div>src: TED / e-Notification</div>
+          <div>scope: BE — alle gewesten</div>
+          <div>{new Date().toLocaleDateString("nl-BE", { dateStyle: "long" })}</div>
+        </div>
       </header>
 
-      <main>
-        <SearchBar onSearch={handleSearch} />
+      <div className="app-body">
+        <aside className="sidebar">
+          <SearchBar
+            onSearch={handleSearch}
+            total={data?.total ?? null}
+            loading={loading}
+          />
+        </aside>
 
-        {loading && <div className="state-msg">Laden...</div>}
-        {error && <div className="state-msg error">Fout: {error}</div>}
-
-        {data && !loading && (
-          <>
-            <div className="results-info">
-              {data.total} aanbestedingen gevonden
-            </div>
-            <div className="tender-list">
-              {data.items.map((t) => (
-                <TenderCard key={t.id} tender={t} />
-              ))}
-            </div>
-            {totalPages > 1 && (
-              <div className="pagination">
-                <button onClick={() => setPage((p) => p - 1)} disabled={page === 1}>
-                  Vorige
-                </button>
-                <span>
-                  {page} / {totalPages}
-                </span>
-                <button onClick={() => setPage((p) => p + 1)} disabled={page === totalPages}>
-                  Volgende
-                </button>
+        <main className="main-content">
+          {loading && (
+            <div className="state-msg loading">dossiers ophalen</div>
+          )}
+          {error && !loading && (
+            <div className="state-msg error">[ fout ] {error}</div>
+          )}
+          {!loading && data && data.items.length === 0 && (
+            <div className="state-msg">geen dossiers gevonden</div>
+          )}
+          {!loading && data && data.items.length > 0 && (
+            <>
+              <div className="tender-list">
+                {data.items.map((t) => (
+                  <TenderCard key={t.id} tender={t} />
+                ))}
               </div>
-            )}
-          </>
-        )}
-      </main>
+
+              {totalPages > 1 && (
+                <div className="pagination">
+                  <button
+                    onClick={() => setPage((p) => p - 1)}
+                    disabled={page === 1}
+                  >
+                    ← vorige
+                  </button>
+                  <span className="pagination-info">
+                    {page} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={page === totalPages}
+                  >
+                    volgende →
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
