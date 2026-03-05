@@ -1,43 +1,90 @@
 """
-TED (Tenders Electronic Daily) API client
-Docs: https://ted.europa.eu/api/v3.0/
+TED (Tenders Electronic Daily) API client — v3
+Docs: https://api.ted.europa.eu/swagger-ui/index.html
 """
 import httpx
 from typing import Optional
 from app.models.tender import Tender
 
 TED_API_BASE = "https://api.ted.europa.eu/v3"
-# Geen API key nodig voor publieke endpoints; optioneel voor hogere rate limits
+
+TED_FIELDS = [
+    "publication-number",
+    "notice-title",
+    "buyer-name",
+    "publication-date",
+    "deadline-date-lot",
+    "classification-cpv",
+    "place-of-performance",
+]
+
+
+def _pick_lang(obj: dict | None, langs=("nld", "fra", "eng")) -> str | None:
+    """Kies de beste taalversie uit een meertalig TED veld."""
+    if not obj:
+        return None
+    for lang in langs:
+        values = obj.get(lang)
+        if values:
+            return values[0] if isinstance(values, list) else values
+    # Fallback: eerste beschikbare taal
+    for values in obj.values():
+        if values:
+            return values[0] if isinstance(values, list) else values
+    return None
+
+
+def _parse_date(raw: str | None) -> str | None:
+    """Verwijder tijdzone suffix van TED datumstrings ("2025-01-02+01:00" → "2025-01-02")."""
+    if not raw:
+        return None
+    return raw[:10]
 
 
 def _parse_tender(notice: dict) -> Optional[Tender]:
     try:
-        nid = notice.get("publicationNumber", "")
-        title_obj = notice.get("title") or {}
-        title = (
-            title_obj.get("NLD")
-            or title_obj.get("FRA")
-            or next(iter(title_obj.values()), "Onbekend")
+        nid = notice.get("publication-number", "")
+        title = _pick_lang(notice.get("notice-title"))
+        authority = _pick_lang(notice.get("buyer-name")) or "Onbekend"
+        pub_date = _parse_date(notice.get("publication-date"))
+
+        # deadline: kan een lijst zijn per lot
+        deadline_raw = notice.get("deadline-date-lot")
+        deadline = None
+        if isinstance(deadline_raw, list) and deadline_raw:
+            deadline = _parse_date(deadline_raw[0])
+        elif isinstance(deadline_raw, str):
+            deadline = _parse_date(deadline_raw)
+
+        # CPV: eerste code in de lijst
+        cpv_list = notice.get("classification-cpv") or []
+        cpv_code = cpv_list[0] if cpv_list else None
+
+        # NUTS: filter op BE-codes, neem de meest specifieke
+        nuts_list = notice.get("place-of-performance") or []
+        be_nuts = [n for n in nuts_list if n.startswith("BE") and n != "BEL"]
+        nuts_code = be_nuts[0] if be_nuts else ("BEL" if "BEL" in nuts_list else None)
+
+        # URL: gebruik NL html link als beschikbaar
+        links = notice.get("links") or {}
+        html_links = links.get("html") or links.get("htmlDirect") or {}
+        url = (
+            html_links.get("NLD")
+            or html_links.get("FRA")
+            or html_links.get("ENG")
+            or f"https://ted.europa.eu/en/notice/-/detail/{nid}"
         )
-        authority = notice.get("buyer", {}).get("officialName", "Onbekend")
-        pub_date = notice.get("publicationDate")  # "YYYY-MM-DD"
-        deadline = (notice.get("submissionDeadlineDate") or "").split("T")[0] or None
-        value_obj = notice.get("estimatedValue") or {}
-        est_value = value_obj.get("value")
-        cpv = (notice.get("cpvCode") or {})
-        nuts = (notice.get("placeOfPerformance") or [{}])[0].get("nutsCode")
-        url = f"https://ted.europa.eu/en/notice/-/detail/{nid}"
 
         return Tender(
             id=nid,
-            title=title,
+            title=title or f"Aanbesteding {nid}",
             contracting_authority=authority,
-            publication_date=pub_date or None,
-            deadline=deadline or None,
-            estimated_value=est_value,
-            cpv_code=cpv.get("code"),
-            cpv_description=cpv.get("description"),
-            nuts_code=nuts,
+            publication_date=pub_date,
+            deadline=deadline,
+            estimated_value=None,   # TED v3 geeft waarde enkel in detail-endpoint
+            cpv_code=cpv_code,
+            cpv_description=None,
+            nuts_code=nuts_code,
             description=None,
             url=url,
             source="TED",
@@ -48,45 +95,39 @@ def _parse_tender(notice: dict) -> Optional[Tender]:
 
 async def fetch_belgian_tenders(
     page: int = 1,
-    page_size: int = 20,
+    page_size: int = 25,
     query: Optional[str] = None,
     cpv: Optional[str] = None,
     nuts: Optional[str] = None,
 ) -> tuple[list[Tender], int]:
-    """Haal Belgische aanbestedingen op via TED search API."""
-    filters = ["BT-09(b)-Procedure in ['BE']"]  # alleen België
+    """Haal recente Belgische aanbestedingen op via TED Search API."""
+    filters = [
+        "buyer-country=BEL",
+        "publication-date>=20240101",  # enkel recente dossiers
+    ]
+
     if cpv:
-        filters.append(f"CPVCode = '{cpv}'")
+        filters.append(f"classification-cpv={cpv}")
     if nuts:
-        filters.append(f"BT-728-Place LIKE '{nuts}%'")
+        filters.append(f"place-of-performance={nuts}*")
+    if query:
+        filters.append(f"notice-title~{query}")
 
     search_query = " AND ".join(filters)
-    if query:
-        search_query = f"({query}) AND {search_query}"
 
     payload = {
         "query": search_query,
         "page": page,
         "limit": page_size,
-        "fields": [
-            "publicationNumber",
-            "title",
-            "buyer",
-            "publicationDate",
-            "submissionDeadlineDate",
-            "estimatedValue",
-            "cpvCode",
-            "placeOfPerformance",
-        ],
-        "sort": [{"field": "publicationDate", "order": "DESC"}],
+        "fields": TED_FIELDS,
     }
 
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with httpx.AsyncClient(timeout=20) as client:
         resp = await client.post(f"{TED_API_BASE}/notices/search", json=payload)
         resp.raise_for_status()
         data = resp.json()
 
     notices = data.get("notices", [])
-    total = data.get("total", 0)
+    total = data.get("totalNoticeCount", 0)
     tenders = [t for n in notices if (t := _parse_tender(n)) is not None]
     return tenders, total
