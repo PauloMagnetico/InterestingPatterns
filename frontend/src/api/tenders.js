@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 export async function fetchTenders({ page = 1, pageSize = 20, q, cpv, nuts } = {}) {
   const params = new URLSearchParams({ page, page_size: pageSize });
