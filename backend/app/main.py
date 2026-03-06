@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import tenders
+from app.routers import tenders, notices
 
 app = FastAPI(
     title="InterestingPatterns API",
@@ -16,6 +16,7 @@ app.add_middleware(
 )
 
 app.include_router(tenders.router, prefix="/tenders", tags=["tenders"])
+app.include_router(notices.router, prefix="/notices", tags=["notices"])
 
 
 @app.get("/")

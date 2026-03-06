@@ -1,3 +1,6 @@
+import { useState } from "react";
+import NoticeModal from "./NoticeModal";
+
 function fmt(d) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("nl-BE", { day: "2-digit", month: "short", year: "numeric" });
@@ -21,51 +24,64 @@ function isNear(d) {
 export default function TenderCard({ tender, onSelect }) {
   const value = fmtEur(tender.estimated_value);
   const deadlineNear = isNear(tender.deadline);
+  const [showModal, setShowModal] = useState(false);
 
   return (
-    <article className="tender-card" onClick={onSelect} style={{ cursor: "pointer" }}>
-      <div className="card-top">
-        <a
-          className="card-title"
-          href={tender.url}
-          target="_blank"
-          rel="noreferrer"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {tender.title}
-        </a>
-        <div className="card-badges">
-          <span className="badge badge-source">{tender.source}</span>
-          {tender.nuts_code && (
-            <span className="badge badge-nuts">{tender.nuts_code}</span>
-          )}
-          {tender.cpv_code && (
-            <span className="badge badge-cpv">{tender.cpv_code}</span>
-          )}
-        </div>
-      </div>
-
-      <p className="card-authority">{tender.contracting_authority}</p>
-
-      <div className="card-footer">
-        <div className="card-stat">
-          <span className="card-stat-label">Publicatie</span>
-          <span className="card-stat-value">{fmt(tender.publication_date)}</span>
-        </div>
-        <div className="card-stat">
-          <span className="card-stat-label">Deadline</span>
-          <span className={`card-stat-value ${deadlineNear ? "deadline-near" : ""}`}>
-            {fmt(tender.deadline)}
-            {deadlineNear && " ⚠"}
-          </span>
-        </div>
-        {value && (
-          <div className="card-stat">
-            <span className="card-stat-label">Geraamde waarde</span>
-            <span className="card-stat-value highlight">{value}</span>
+    <>
+      <article className="tender-card" onClick={onSelect} style={{ cursor: "pointer" }}>
+        <div className="card-top">
+          <a
+            className="card-title"
+            href={tender.url}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {tender.title}
+          </a>
+          <div className="card-badges">
+            <span className="badge badge-source">{tender.source}</span>
+            {tender.nuts_code && (
+              <span className="badge badge-nuts">{tender.nuts_code}</span>
+            )}
+            {tender.cpv_code && (
+              <span className="badge badge-cpv">{tender.cpv_code}</span>
+            )}
           </div>
-        )}
-      </div>
-    </article>
+        </div>
+
+        <p className="card-authority">{tender.contracting_authority}</p>
+
+        <div className="card-footer">
+          <div className="card-stat">
+            <span className="card-stat-label">Publicatie</span>
+            <span className="card-stat-value">{fmt(tender.publication_date)}</span>
+          </div>
+          <div className="card-stat">
+            <span className="card-stat-label">Deadline</span>
+            <span className={`card-stat-value ${deadlineNear ? "deadline-near" : ""}`}>
+              {fmt(tender.deadline)}
+              {deadlineNear && " ⚠"}
+            </span>
+          </div>
+          {value && (
+            <div className="card-stat">
+              <span className="card-stat-label">Geraamde waarde</span>
+              <span className="card-stat-value highlight">{value}</span>
+            </div>
+          )}
+          <button
+            className="analyse-btn"
+            onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
+          >
+            analyseer
+          </button>
+        </div>
+      </article>
+
+      {showModal && (
+        <NoticeModal tender={tender} onClose={() => setShowModal(false)} />
+      )}
+    </>
   );
 }
