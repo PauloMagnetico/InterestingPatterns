@@ -15,17 +15,21 @@ NS = {
     "efbc": "http://data.europa.eu/p27/eforms-ubl-extension-basic-components/1",
 }
 
-_KBO_RE = re.compile(r"BE\s*(\d[\d.]{8,11})")
+_KBO_RE = re.compile(r"(?:BE\s*)?(\d[\d.]{8,11})")
 
 
 def _clean_kbo(raw: str) -> Optional[str]:
-    """'BE 0475.480.736' of 'BE 0887229108' → '0475480736'"""
+    """'BE 0475.480.736', 'BE 0887229108', or bare '0415962823' → '0415962823'"""
     if not raw:
         return None
     m = _KBO_RE.search(raw)
     if not m:
         return None
-    return m.group(1).replace(".", "").replace(" ", "").zfill(10)
+    cleaned = m.group(1).replace(".", "").replace(" ", "").zfill(10)
+    # Must be exactly 10 digits to be a valid KBO number
+    if not cleaned.isdigit() or len(cleaned) != 10:
+        return None
+    return cleaned
 
 
 def _text(el, path: str) -> Optional[str]:
@@ -55,7 +59,7 @@ def _parse_organisations(root: ET.Element) -> dict[str, TedOrganisation]:
         if company is None:
             continue
 
-        internal_id = _text(company, "cbc:ID")
+        internal_id = _text(company, "cac:PartyIdentification/cbc:ID")
         if not internal_id:
             continue
 
