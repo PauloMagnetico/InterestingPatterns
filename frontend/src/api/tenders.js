@@ -16,3 +16,9 @@ export async function fetchTender(id) {
   if (!res.ok) throw new Error(`API fout: ${res.status}`);
   return res.json();
 }
+
+export async function analyzeTender(id) {
+  const res = await fetch(`${BASE_URL}/tenders/${id}/analyze`);
+  if (!res.ok) throw new Error(`Analyse mislukt: ${res.status}`);
+  return res.json();
+}

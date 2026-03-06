@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchTenders } from "./api/tenders";
 import TenderCard from "./components/TenderCard";
+import TenderDetail from "./components/TenderDetail";
 import SearchBar from "./components/SearchBar";
 import "./App.css";
 
@@ -12,6 +13,7 @@ export default function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedTender, setSelectedTender] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -67,7 +69,7 @@ export default function App() {
             <>
               <div className="tender-list">
                 {data.items.map((t) => (
-                  <TenderCard key={t.id} tender={t} />
+                  <TenderCard key={t.id} tender={t} onSelect={() => setSelectedTender(t)} />
                 ))}
               </div>
 
@@ -94,6 +96,13 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {selectedTender && (
+        <TenderDetail
+          tender={selectedTender}
+          onClose={() => setSelectedTender(null)}
+        />
+      )}
     </div>
   );
 }

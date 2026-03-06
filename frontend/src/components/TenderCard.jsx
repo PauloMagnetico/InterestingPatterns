@@ -18,18 +18,19 @@ function isNear(d) {
   return days >= 0 && days <= 14;
 }
 
-export default function TenderCard({ tender }) {
+export default function TenderCard({ tender, onSelect }) {
   const value = fmtEur(tender.estimated_value);
   const deadlineNear = isNear(tender.deadline);
 
   return (
-    <article className="tender-card">
+    <article className="tender-card" onClick={onSelect} style={{ cursor: "pointer" }}>
       <div className="card-top">
         <a
           className="card-title"
           href={tender.url}
           target="_blank"
           rel="noreferrer"
+          onClick={(e) => e.stopPropagation()}
         >
           {tender.title}
         </a>

@@ -382,6 +382,248 @@
   letter-spacing: 0.06em;
 }
 
+/* ── Detail overlay & panel ────────────────────────────── */
+
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 6, 0.72);
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  backdrop-filter: blur(2px);
+}
+
+.detail-panel {
+  width: min(680px, 100vw);
+  height: 100vh;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.22s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.75rem 1.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.detail-title-block {
+  flex: 1;
+}
+
+.detail-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--cream);
+}
+
+.detail-id {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.65rem;
+  color: var(--cream-muted);
+  letter-spacing: 0.1em;
+}
+
+.detail-close {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--cream-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1px;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.detail-close:hover {
+  border-color: var(--red);
+  color: var(--cream);
+}
+
+.detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.75rem;
+}
+
+.detail-note {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.72rem;
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.04em;
+}
+
+/* ── Org cards grid ─────────────────────────────────────── */
+
+.orgs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.org-card {
+  border: 1px solid var(--border);
+  padding: 1.1rem 1.25rem;
+}
+
+.org-card-header {
+  margin-bottom: 0.85rem;
+}
+
+.org-role-label {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--red);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.org-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cream);
+  line-height: 1.25;
+}
+
+.org-number {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.62rem;
+  color: var(--cream-muted);
+  letter-spacing: 0.08em;
+}
+
+.board-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+}
+
+.board-member {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.board-member--overlap {
+  background: rgba(227, 6, 19, 0.05);
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+}
+
+.member-name {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.9rem;
+  color: var(--cream);
+  flex: 1;
+}
+
+.member-role {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--cream-muted);
+  text-transform: lowercase;
+}
+
+.overlap-tag {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--red);
+  border: 1px solid var(--red-dim);
+  padding: 0.1rem 0.3rem;
+  flex-shrink: 0;
+}
+
+.board-empty {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.7rem;
+  color: var(--cream-muted);
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Overlaps summary section ───────────────────────────── */
+
+.overlaps-section {
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+}
+
+.overlaps-title {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 0.75rem;
+}
+
+.overlaps-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.overlap-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 2px solid var(--red-dim);
+}
+
+.overlap-person {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.9rem;
+  color: var(--cream);
+}
+
+.overlap-orgs {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.62rem;
+  color: var(--cream-muted);
+  letter-spacing: 0.04em;
+}
+
 /* ── Responsive ────────────────────────────────────────── */
 
 @media (max-width: 768px) {

@@ -93,6 +93,29 @@ def _parse_tender(notice: dict) -> Optional[Tender]:
         return None
 
 
+DETAIL_FIELDS = TED_FIELDS + [
+    "winner-name",
+    "winner-country",
+    "award-value",
+    "contract-nature",
+]
+
+
+async def fetch_tender_detail(tender_id: str) -> Optional[dict]:
+    """Haal het volledige TED-dossier op via publication-number."""
+    payload = {
+        "query": f"publication-number={tender_id}",
+        "fields": DETAIL_FIELDS,
+        "limit": 1,
+    }
+    async with httpx.AsyncClient(timeout=20) as client:
+        resp = await client.post(f"{TED_API_BASE}/notices/search", json=payload)
+        resp.raise_for_status()
+        data = resp.json()
+    notices = data.get("notices", [])
+    return notices[0] if notices else None
+
+
 async def fetch_belgian_tenders(
     page: int = 1,
     page_size: int = 25,
