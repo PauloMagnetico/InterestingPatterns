@@ -34,6 +34,38 @@ def _pick_lang(obj: dict | None, langs=("nld", "fra", "eng")) -> str | None:
     return None
 
 
+def _pick_lang_all(obj: dict | list | None, langs=("nld", "fra", "eng")) -> list[str]:
+    """
+    Geeft ALLE waarden terug uit een meertalig TED veld, zodat meerdere kopers
+    of winnaars niet worden afgekapt.
+
+    TED kan dit veld op twee manieren structureren:
+      - dict  {"nld": ["Stad Gent", "OCMW Gent"], "fra": [...]}
+      - list  [{"nld": ["Stad Gent"]}, {"nld": ["OCMW Gent"]}]
+    """
+    if not obj:
+        return []
+
+    # Lijst van meertalige dicts → haal per item de beste taalversie op
+    if isinstance(obj, list):
+        results = []
+        for item in obj:
+            v = _pick_lang(item, langs) if isinstance(item, dict) else str(item)
+            if v:
+                results.append(v)
+        return results
+
+    # Enkelvoudige dict → alle waarden per voorkeurstaal, daarna fallback
+    for lang in langs:
+        values = obj.get(lang)
+        if values:
+            return values if isinstance(values, list) else [values]
+    for values in obj.values():
+        if values:
+            return values if isinstance(values, list) else [values]
+    return []
+
+
 def _parse_date(raw: str | None) -> str | None:
     """Verwijder tijdzone suffix van TED datumstrings ("2025-01-02+01:00" → "2025-01-02")."""
     if not raw:

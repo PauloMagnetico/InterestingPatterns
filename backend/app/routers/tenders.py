@@ -3,7 +3,7 @@ from fastapi import APIRouter, Query, HTTPException
 from typing import Optional
 from app.models.tender import TenderList
 from app.models.analysis import TenderAnalysis, BoardOverlap
-from app.scrapers.ted import fetch_belgian_tenders, fetch_tender_detail, _pick_lang
+from app.scrapers.ted import fetch_belgian_tenders, fetch_tender_detail, _pick_lang_all
 from app.scrapers.opencorporates import lookup_organization
 
 router = APIRouter()
@@ -37,38 +37,34 @@ async def analyze_tender(tender_id: str):
     if not notice:
         raise HTTPException(status_code=404, detail="Aanbesteding niet gevonden in TED")
 
-    # Aanbestedende organisatie
-    authority_name = _pick_lang(notice.get("buyer-name")) or "Onbekend"
+    # Aanbestedende organisaties — kan er meerdere zijn bij gezamenlijke aanbesteding
+    authority_names = _pick_lang_all(notice.get("buyer-name")) or ["Onbekend"]
 
-    # Gegunde partijen (winner-name kan een string, lijst of None zijn)
-    raw_winners = notice.get("winner-name") or []
-    if isinstance(raw_winners, str):
-        raw_winners = [raw_winners]
-    winner_names: list[str] = []
-    for w in raw_winners[:5]:  # max 5 partijen
-        name = _pick_lang(w) if isinstance(w, dict) else w
-        if name:
-            winner_names.append(name)
+    # Gegunde partijen — alleen aanwezig na gunning
+    winner_names = _pick_lang_all(notice.get("winner-name"))[:5]  # max 5
 
     # Haal alle organisaties parallel op
-    tasks = [lookup_organization(authority_name)] + [
-        lookup_organization(n) for n in winner_names
-    ]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+    all_names = authority_names + winner_names
+    results = await asyncio.gather(
+        *[lookup_organization(n) for n in all_names],
+        return_exceptions=True,
+    )
 
-    authority_org = results[0] if not isinstance(results[0], Exception) else None
-    if not authority_org:
+    authority_orgs = [
+        r for r in results[: len(authority_names)]
+        if not isinstance(r, Exception)
+    ]
+    awarded_orgs = [
+        r for r in results[len(authority_names):]
+        if not isinstance(r, Exception)
+    ]
+
+    if not authority_orgs:
         raise HTTPException(status_code=502, detail="Fout bij ophalen organisatiedata")
 
-    awarded_orgs = [
-        r for r in results[1:] if not isinstance(r, Exception)
-    ]
-
-    # Bereken overlappende bestuurders
+    # Bereken overlappende bestuurders over alle betrokken organisaties
     person_orgs: dict[str, list[str]] = {}
-    for member in authority_org.board:
-        person_orgs.setdefault(member.name, []).append(authority_org.name)
-    for org in awarded_orgs:
+    for org in authority_orgs + awarded_orgs:
         for member in org.board:
             person_orgs.setdefault(member.name, []).append(org.name)
 
@@ -78,11 +74,11 @@ async def analyze_tender(tender_id: str):
         if len(orgs) > 1
     ]
 
-    note = None if winner_names else "Geen gegunde partijen gevonden (mogelijk een openstaande procedure)"
+    note = None if winner_names else "Openstaande procedure — nog geen gegunde partijen"
 
     return TenderAnalysis(
         tender_id=tender_id,
-        contracting_authority=authority_org,
+        contracting_authorities=authority_orgs,
         awarded_parties=awarded_orgs,
         board_overlaps=overlaps,
         note=note,

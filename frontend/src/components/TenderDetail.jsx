@@ -83,14 +83,17 @@ export default function TenderDetail({ tender, onClose }) {
               )}
 
               <div className="orgs-grid">
-                <OrgCard
-                  org={analysis.contracting_authority}
-                  overlapNames={overlapNames}
-                  role="Aanbestedende overheid"
-                />
+                {analysis.contracting_authorities.map((org, i) => (
+                  <OrgCard
+                    key={`auth-${i}`}
+                    org={org}
+                    overlapNames={overlapNames}
+                    role="Aanbestedende overheid"
+                  />
+                ))}
                 {analysis.awarded_parties.map((org, i) => (
                   <OrgCard
-                    key={i}
+                    key={`winner-${i}`}
                     org={org}
                     overlapNames={overlapNames}
                     role="Gegunde partij"

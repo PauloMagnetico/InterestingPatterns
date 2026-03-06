@@ -21,7 +21,7 @@ class BoardOverlap(BaseModel):
 
 class TenderAnalysis(BaseModel):
     tender_id: str
-    contracting_authority: Organization
+    contracting_authorities: list[Organization]   # altijd minstens één
     awarded_parties: list[Organization] = []
     board_overlaps: list[BoardOverlap] = []
     note: Optional[str] = None
