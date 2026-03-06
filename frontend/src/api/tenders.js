@@ -1,10 +1,11 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
-export async function fetchTenders({ page = 1, pageSize = 20, q, cpv, nuts } = {}) {
+export async function fetchTenders({ page = 1, pageSize = 20, q, cpv, nuts, awardedOnly } = {}) {
   const params = new URLSearchParams({ page, page_size: pageSize });
   if (q) params.set("q", q);
   if (cpv) params.set("cpv", cpv);
   if (nuts) params.set("nuts", nuts);
+  if (awardedOnly) params.set("awarded_only", "true");
 
   const res = await fetch(`${BASE_URL}/tenders?${params}`);
   if (!res.ok) throw new Error(`API fout: ${res.status}`);
@@ -27,5 +28,11 @@ export async function fetchNotice(publicationNumber, includeMandataries = true) 
   const params = new URLSearchParams({ include_mandataries: includeMandataries });
   const res = await fetch(`${BASE_URL}/notices/${publicationNumber}?${params}`);
   if (!res.ok) throw new Error(`API fout: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchKbo(kboNumber) {
+  const res = await fetch(`${BASE_URL}/kbo/${kboNumber}`);
+  if (!res.ok) throw new Error(`KBO ophalen mislukt: ${res.status}`);
   return res.json();
 }

@@ -907,6 +907,271 @@
   opacity: 0.7;
 }
 
+/* ── Region map ─────────────────────────────────────────── */
+
+.nuts-selected {
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-top: 0.3rem;
+  font-weight: 500;
+}
+
+/* ── Awarded-only toggle ────────────────────────────────── */
+
+.filter-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.toggle-label {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  margin-bottom: 0 !important;
+  font-size: 0.82rem !important;
+  color: var(--text-dim) !important;
+}
+
+.toggle-checkbox {
+  width: 14px !important;
+  height: 14px !important;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ── Header KBO link ────────────────────────────────────── */
+
+.header-kbo-link {
+  margin-top: 0.4rem;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  display: block;
+  width: fit-content;
+  margin-left: auto;
+}
+
+.header-kbo-link:hover {
+  background: #eff6ff;
+  border-color: var(--accent);
+}
+
+/* ── KBO demo overlay ────────────────────────────────────── */
+
+.kbo-demo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  overflow-y: auto;
+}
+
+.kbo-demo-panel {
+  width: 100%;
+  max-width: 680px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.13);
+  animation: fadeSlideIn 0.18s ease both;
+  overflow: hidden;
+}
+
+.kbo-demo-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.5rem 1.75rem 1.125rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.kbo-demo-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+
+.kbo-demo-header h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.12s;
+}
+
+.close-btn:hover { color: var(--text); }
+
+.kbo-demo-form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.kbo-demo-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.55rem 0.85rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  font-family: 'Inter', system-ui, sans-serif;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.kbo-demo-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.kbo-demo-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.kbo-demo-btn:hover { background: var(--accent-hover); }
+.kbo-demo-btn:disabled { opacity: 0.6; }
+
+.kbo-demo-error {
+  margin: 1.25rem 1.75rem;
+  font-size: 0.82rem;
+  color: var(--red);
+  background: #fef2f2;
+  border: 1px solid var(--red-dim);
+  border-radius: 6px;
+  padding: 0.65rem 0.9rem;
+}
+
+.kbo-demo-result {
+  padding: 1.25rem 1.75rem 1.75rem;
+}
+
+.kbo-result-header {
+  margin-bottom: 1.25rem;
+}
+
+.kbo-result-header h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.kbo-result-meta {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.kbo-badge {
+  font-size: 0.68rem;
+  font-weight: 500;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+}
+
+.kbo-badge-gray {
+  background: var(--bg-input);
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+
+.kbo-badge-green {
+  background: #f0fdf4;
+  color: var(--green);
+  border-color: #bbf7d0;
+}
+
+.kbo-badge-red {
+  background: #fef2f2;
+  color: var(--red);
+  border-color: var(--red-dim);
+}
+
+.kbo-empty {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 1rem 0;
+}
+
+.kbo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.kbo-table th {
+  text-align: left;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 0 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.kbo-table td {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  vertical-align: top;
+}
+
+.kbo-table tr:last-child td { border-bottom: none; }
+
+.kbo-name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.kbo-since {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
 /* ── Responsive ────────────────────────────────────────── */
 
 @media (max-width: 768px) {

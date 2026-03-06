@@ -1,16 +1,19 @@
 import { useState } from "react";
+import BelgiumMap from "./BelgiumMap";
 
 export default function SearchBar({ onSearch, total, loading }) {
   const [q, setQ] = useState("");
   const [cpv, setCpv] = useState("");
   const [nuts, setNuts] = useState("");
+  const [awardedOnly, setAwardedOnly] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSearch({
       q: q.trim() || undefined,
       cpv: cpv.trim() || undefined,
-      nuts: nuts.trim() || undefined,
+      nuts: nuts || undefined,
+      awardedOnly: awardedOnly || undefined,
     });
   };
 
@@ -41,13 +44,25 @@ export default function SearchBar({ onSearch, total, loading }) {
       </div>
 
       <div className="filter-group">
-        <label htmlFor="nuts">Regio</label>
-        <select id="nuts" value={nuts} onChange={(e) => setNuts(e.target.value)}>
-          <option value="">Heel België</option>
-          <option value="BE1">BE1 — Brussels</option>
-          <option value="BE2">BE2 — Vlaanderen</option>
-          <option value="BE3">BE3 — Wallonië</option>
-        </select>
+        <label>Regio</label>
+        <BelgiumMap value={nuts} onChange={setNuts} />
+        {nuts && (
+          <p className="nuts-selected">
+            {nuts === "BE1" ? "Brussels Hoofdstedelijk Gewest" : nuts === "BE2" ? "Vlaanderen" : "Wallonië"}
+          </p>
+        )}
+      </div>
+
+      <div className="filter-group filter-toggle">
+        <label className="toggle-label">
+          <input
+            type="checkbox"
+            checked={awardedOnly}
+            onChange={(e) => setAwardedOnly(e.target.checked)}
+            className="toggle-checkbox"
+          />
+          <span className="toggle-text">Enkel gegunde opdrachten</span>
+        </label>
       </div>
 
       <button type="submit" className="search-btn" disabled={loading}>

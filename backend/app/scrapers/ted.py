@@ -154,6 +154,7 @@ async def fetch_belgian_tenders(
     query: Optional[str] = None,
     cpv: Optional[str] = None,
     nuts: Optional[str] = None,
+    awarded_only: bool = False,
 ) -> tuple[list[Tender], int]:
     """Haal recente Belgische aanbestedingen op via TED Search API."""
     filters = [
@@ -167,6 +168,8 @@ async def fetch_belgian_tenders(
         filters.append(f"place-of-performance={nuts}*")
     if query:
         filters.append(f"notice-title~{query}")
+    if awarded_only:
+        filters.append("winner-name=*")
 
     search_query = " AND ".join(filters)
 

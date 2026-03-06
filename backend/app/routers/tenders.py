@@ -16,10 +16,12 @@ async def list_tenders(
     q: Optional[str] = Query(None, description="Vrije zoekterm"),
     cpv: Optional[str] = Query(None, description="CPV-code filter"),
     nuts: Optional[str] = Query(None, description="NUTS-regio filter (bijv. BE2)"),
+    awarded_only: bool = Query(False, description="Toon enkel gegunde opdrachten"),
 ):
     try:
         tenders, total = await fetch_belgian_tenders(
-            page=page, page_size=page_size, query=q, cpv=cpv, nuts=nuts
+            page=page, page_size=page_size, query=q, cpv=cpv, nuts=nuts,
+            awarded_only=awarded_only,
         )
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Data ophalen mislukt: {e}")

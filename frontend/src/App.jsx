@@ -3,6 +3,7 @@ import { fetchTenders } from "./api/tenders";
 import TenderCard from "./components/TenderCard";
 import TenderDetail from "./components/TenderDetail";
 import SearchBar from "./components/SearchBar";
+import KboDemoPage from "./components/KboDemoPage";
 import "./App.css";
 
 const PAGE_SIZE = 25;
@@ -14,6 +15,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedTender, setSelectedTender] = useState(null);
+  const [showKboDemo, setShowKboDemo] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -43,6 +45,9 @@ export default function App() {
           <div>src: TED / e-Notification</div>
           <div>scope: BE — alle gewesten</div>
           <div>{new Date().toLocaleDateString("nl-BE", { dateStyle: "long" })}</div>
+          <button className="header-kbo-link" onClick={() => setShowKboDemo(true)}>
+            KBO opzoeken
+          </button>
         </div>
       </header>
 
@@ -102,6 +107,10 @@ export default function App() {
           tender={selectedTender}
           onClose={() => setSelectedTender(null)}
         />
+      )}
+
+      {showKboDemo && (
+        <KboDemoPage onClose={() => setShowKboDemo(false)} />
       )}
     </div>
   );
