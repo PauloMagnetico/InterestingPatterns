@@ -22,3 +22,10 @@ export async function analyzeTender(id) {
   if (!res.ok) throw new Error(`Analyse mislukt: ${res.status}`);
   return res.json();
 }
+
+export async function fetchNotice(publicationNumber, includeMandataries = true) {
+  const params = new URLSearchParams({ include_mandataries: includeMandataries });
+  const res = await fetch(`${BASE_URL}/notices/${publicationNumber}?${params}`);
+  if (!res.ok) throw new Error(`API fout: ${res.status}`);
+  return res.json();
+}
