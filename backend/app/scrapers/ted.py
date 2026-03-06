@@ -128,7 +128,7 @@ def _parse_tender(notice: dict) -> Optional[Tender]:
 DETAIL_FIELDS = TED_FIELDS + [
     "winner-name",
     "winner-country",
-    "award-value",
+    "result-value-lot",
     "contract-nature",
 ]
 
