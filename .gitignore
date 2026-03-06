@@ -17,3 +17,4 @@ frontend/dist/
 .runtime/
 .claude/
 .logs/
+.beads/
